@@ -318,6 +318,62 @@ html,body{width:100%;height:100vh;overflow:hidden;background:var(--cv);font-fami
 .art-video-hd{padding:0 36px 10px;border-top:1px solid rgba(255,255,255,.06);}
 .art-video-wrap{padding:0 24px 24px;}
 .art-video-wrap iframe{width:100%;height:280px;border-radius:8px;border:none;display:block;background:#000;}
+
+/* ════════════════════════════════
+   MOBILE  (≤ 768px)
+   ════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* Grid: single column, canvas takes everything */
+  .app{grid-template-columns:1fr!important;grid-template-rows:40px 1fr!important;}
+  .left,.right{display:none!important;}
+
+  /* Canvas: remove ruler offsets */
+  .ci{top:0!important;left:0!important;bottom:0!important;}
+  .ruler-h,.ruler-v,.status,.bb{display:none!important;}
+
+  /* Topbar: keep logo + lang toggle only */
+  .tb-file,.tb-div,.zoom-b,.btn-play,.btn-share{display:none!important;}
+  .topbar{padding:0 12px;gap:6px;}
+
+  /* Touch: no browser interference */
+  .ci{touch-action:none;}
+
+  /* Mobile nav bar */
+  .mobile-nav{display:flex!important;}
+}
+
+/* Mobile nav — hidden on desktop */
+.mobile-nav{
+  display:none;
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:998;
+  background:rgba(28,28,28,.92);
+  border:1px solid var(--bd2);
+  border-radius:100px;
+  padding:8px 14px;
+  align-items:center;
+  gap:10px;
+  box-shadow:0 8px 32px rgba(0,0,0,.7);
+  backdrop-filter:blur(12px);
+  max-width:calc(100vw - 32px);
+}
+.mnav-btn{
+  width:28px;height:28px;border:none;background:transparent;
+  color:var(--t2);font-size:20px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;transition:all .15s;padding:0;line-height:1;
+  flex-shrink:0;
+}
+.mnav-btn:active{background:var(--ps);color:var(--t1);}
+.mnav-info{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;}
+.mnav-label{font-size:11px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
+.mnav-dots{display:flex;gap:5px;align-items:center;}
+.mnav-dot{width:4px;height:4px;border-radius:50%;background:var(--t3);transition:all .2s;flex-shrink:0;}
+.mnav-dot.act{background:var(--ac);width:6px;height:6px;}
 </style>
 </head>
 <body>
@@ -415,6 +471,15 @@ html,body{width:100%;height:100vh;overflow:hidden;background:var(--cv);font-fami
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
   ESC para sair
 </button>
+<!-- MOBILE NAV -->
+<div class="mobile-nav" id="mobileNav">
+  <button class="mnav-btn" onclick="mobilePrev()">&#8249;</button>
+  <div class="mnav-info">
+    <div class="mnav-label" id="mNavLabel">Comece por aqui</div>
+    <div class="mnav-dots" id="mNavDots"></div>
+  </div>
+  <button class="mnav-btn" onclick="mobileNext()">&#8250;</button>
+</div>
 <div class="present-nav">
   <button class="pnav-btn" onclick="sw(Math.max(act-1,0))">‹</button>
   <span class="pnav-info" id="presentInfo">1 / 8</span>
@@ -876,6 +941,7 @@ const _swPrev = window.sw || sw;
 window.sw = function(i){
   _swPrev(i);
   setTimeout(updatePresentInfo, 50);
+  setTimeout(updateMobileNav, 60);
 };
 
 
@@ -897,7 +963,68 @@ function buildToolsHtml(){
   }).join('');
 }
 
-buildViews();buildPages();buildLayers(act);buildRight(act);
+
+// ── TOUCH / MOBILE ────────────────────────────────────────
+(function(){
+  var t1=null, t1Origin=null, t2Dist=0, t2Scale=1, t2Mid=null, t2TfOrigin=null;
+
+  ciEl.addEventListener('touchstart', function(e){
+    if(e.touches.length===1){
+      t1={x:e.touches[0].clientX, y:e.touches[0].clientY};
+      t1Origin={x:tf.x, y:tf.y};
+      t2Dist=0;
+    } else if(e.touches.length===2){
+      var dx=e.touches[0].clientX-e.touches[1].clientX;
+      var dy=e.touches[0].clientY-e.touches[1].clientY;
+      t2Dist=Math.sqrt(dx*dx+dy*dy);
+      t2Scale=tf.s;
+      var r=ciEl.getBoundingClientRect();
+      var cx=(e.touches[0].clientX+e.touches[1].clientX)/2-(r.left+r.width/2);
+      var cy=(e.touches[0].clientY+e.touches[1].clientY)/2-(r.top+r.height/2);
+      t2Mid={x:cx,y:cy};
+      t2TfOrigin={x:tf.x,y:tf.y};
+      t1=null;
+    }
+  },{passive:true});
+
+  ciEl.addEventListener('touchmove', function(e){
+    e.preventDefault();
+    if(e.touches.length===1 && t1 && !t2Dist){
+      tf.x=t1Origin.x+(e.touches[0].clientX-t1.x);
+      tf.y=t1Origin.y+(e.touches[0].clientY-t1.y);
+      applyTf();
+    } else if(e.touches.length===2 && t2Dist){
+      var dx=e.touches[0].clientX-e.touches[1].clientX;
+      var dy=e.touches[0].clientY-e.touches[1].clientY;
+      var dist=Math.sqrt(dx*dx+dy*dy);
+      var newS=Math.max(0.1,Math.min(8,t2Scale*(dist/t2Dist)));
+      var ratio=newS/tf.s;
+      tf.x=t2Mid.x+ratio*(t2TfOrigin.x-t2Mid.x);
+      tf.y=t2Mid.y+ratio*(t2TfOrigin.y-t2Mid.y);
+      tf.s=newS;
+      applyTf();
+    }
+  },{passive:false});
+
+  ciEl.addEventListener('touchend',function(){
+    if(!arguments[0]||arguments[0].touches.length===0){t1=null;t2Dist=0;}
+  },{passive:true});
+})();
+
+function updateMobileNav(){
+  var p=P[act];
+  var cat=p.cat?(typeof p.cat==='object'?p.cat[lang]:p.cat):'';
+  var name=pn(p);
+  var lbl=cat?cat+' | '+name:name;
+  var el=document.getElementById('mNavLabel');
+  if(el) el.textContent=lbl;
+  var dots=document.getElementById('mNavDots');
+  if(dots) dots.innerHTML=P.map(function(_,i){return '<div class="mnav-dot'+(i===act?' act':'')+'"></div>';}).join('');
+}
+function mobilePrev(){if(act>0){window.sw(act-1);}}
+function mobileNext(){if(act<P.length-1){window.sw(act+1);}}
+
+buildViews();buildPages();buildLayers(act);buildRight(act);updateMobileNav();
 }
 
 const tipEl=document.getElementById('tip');let tTO;
@@ -1302,6 +1429,7 @@ const _swPrev = window.sw || sw;
 window.sw = function(i){
   _swPrev(i);
   setTimeout(updatePresentInfo, 50);
+  setTimeout(updateMobileNav, 60);
 };
 
 
@@ -1323,7 +1451,68 @@ function buildToolsHtml(){
   }).join('');
 }
 
-buildViews();buildPages();buildLayers(0);buildRight(0);buildRuler();
+
+// ── TOUCH / MOBILE ────────────────────────────────────────
+(function(){
+  var t1=null, t1Origin=null, t2Dist=0, t2Scale=1, t2Mid=null, t2TfOrigin=null;
+
+  ciEl.addEventListener('touchstart', function(e){
+    if(e.touches.length===1){
+      t1={x:e.touches[0].clientX, y:e.touches[0].clientY};
+      t1Origin={x:tf.x, y:tf.y};
+      t2Dist=0;
+    } else if(e.touches.length===2){
+      var dx=e.touches[0].clientX-e.touches[1].clientX;
+      var dy=e.touches[0].clientY-e.touches[1].clientY;
+      t2Dist=Math.sqrt(dx*dx+dy*dy);
+      t2Scale=tf.s;
+      var r=ciEl.getBoundingClientRect();
+      var cx=(e.touches[0].clientX+e.touches[1].clientX)/2-(r.left+r.width/2);
+      var cy=(e.touches[0].clientY+e.touches[1].clientY)/2-(r.top+r.height/2);
+      t2Mid={x:cx,y:cy};
+      t2TfOrigin={x:tf.x,y:tf.y};
+      t1=null;
+    }
+  },{passive:true});
+
+  ciEl.addEventListener('touchmove', function(e){
+    e.preventDefault();
+    if(e.touches.length===1 && t1 && !t2Dist){
+      tf.x=t1Origin.x+(e.touches[0].clientX-t1.x);
+      tf.y=t1Origin.y+(e.touches[0].clientY-t1.y);
+      applyTf();
+    } else if(e.touches.length===2 && t2Dist){
+      var dx=e.touches[0].clientX-e.touches[1].clientX;
+      var dy=e.touches[0].clientY-e.touches[1].clientY;
+      var dist=Math.sqrt(dx*dx+dy*dy);
+      var newS=Math.max(0.1,Math.min(8,t2Scale*(dist/t2Dist)));
+      var ratio=newS/tf.s;
+      tf.x=t2Mid.x+ratio*(t2TfOrigin.x-t2Mid.x);
+      tf.y=t2Mid.y+ratio*(t2TfOrigin.y-t2Mid.y);
+      tf.s=newS;
+      applyTf();
+    }
+  },{passive:false});
+
+  ciEl.addEventListener('touchend',function(){
+    if(!arguments[0]||arguments[0].touches.length===0){t1=null;t2Dist=0;}
+  },{passive:true});
+})();
+
+function updateMobileNav(){
+  var p=P[act];
+  var cat=p.cat?(typeof p.cat==='object'?p.cat[lang]:p.cat):'';
+  var name=pn(p);
+  var lbl=cat?cat+' | '+name:name;
+  var el=document.getElementById('mNavLabel');
+  if(el) el.textContent=lbl;
+  var dots=document.getElementById('mNavDots');
+  if(dots) dots.innerHTML=P.map(function(_,i){return '<div class="mnav-dot'+(i===act?' act':'')+'"></div>';}).join('');
+}
+function mobilePrev(){if(act>0){window.sw(act-1);}}
+function mobileNext(){if(act<P.length-1){window.sw(act+1);}}
+
+buildViews();buildPages();buildLayers(0);buildRight(0);buildRuler();updateMobileNav();
 setTimeout(attachTips,100);
 
 // ── IMAGE DRAG ────────────────────────────────────────────
