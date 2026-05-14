@@ -677,7 +677,7 @@ function buildViews(){
     const flabel=`<div class="fl"><div class="fl-dot" style="background:${p.ac};"></div>${pn(p)}${p.year?` : ${p.year}`:''}</div>`;
 
     if(p.type==='welcome'){
-      const mini=projs.map(pj=>`<div class="pm" onclick="sw(${pj.id})"><img class="pmt" src="${iSrc(pj.imgKey)}" onerror="var c='${iCdn(pj.imgKey)}';c&&this.src!==c?this.src=c:(this.onerror=null,this.src='',this.style.background='${pj.ac}')" loading="lazy" alt="${pn(pj)}"><div><div class="pmn">${pn(pj)}</div><div class="pmy">${pj.year||'2025'}</div></div></div>`).join('');
+      const mini=projs.map(pj=>`<div class="pm" onclick="sw(${pj.id})">${iCdn(pj.imgKey)?`<img class="pmt" src="${iSrc(pj.imgKey)}" onerror="var c='${iCdn(pj.imgKey)}';c&&this.src!==c?this.src=c:(this.onerror=null,this.src='',this.style.background='${pj.ac}')" loading="lazy" alt="${pn(pj)}">`:`<div class="pmt" style="background:${pj.ac};border-radius:4px;"></div>`}<div><div class="pmn">${pn(pj)}</div><div class="pmy">${pj.year||'2025'}</div></div></div>`).join('');
       w.innerHTML=`<div style="position:relative;">
         ${flabel}
         <div class="ww" style="position:relative;">
