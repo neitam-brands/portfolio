@@ -172,7 +172,7 @@ html,body{width:100%;height:100vh;overflow:hidden;background:var(--cv);font-fami
 .pmt{width:34px;height:22px;border-radius:4px;object-fit:cover;flex-shrink:0;border:1px solid var(--bd2);background:var(--ph);}
 .pmn{font-size:11px;font-weight:600;color:var(--t1);}
 .pmy{font-size:10px;font-weight:500;color:var(--t3);}
-.sk{width:174px;background:#E8921A;padding:12px 14px;border-radius:4px;box-shadow:2px 4px 16px rgba(232,146,26,.2);transform:rotate(1.5deg);flex-shrink:0;align-self:flex-end;margin-top:auto;}
+.sk{width:174px;background:#E8921A;padding:12px 14px;border-radius:4px;box-shadow:2px 4px 16px rgba(232,146,26,.2);transform:rotate(1.5deg);position:absolute;cursor:grab;z-index:10;}
 .skt{font-size:11px;font-weight:500;color:#1a0d00;line-height:1.5;}
 .sks{font-size:10px;font-weight:400;color:rgba(26,13,0,.45);margin-top:8px;}
 
@@ -551,7 +551,7 @@ const P=[
    tags:{pt:['Key Visual','Branding','IA','Olist'],en:['Key Visual','Branding','AI','Olist']},
    ac:'#FF6600',fill:'#0F0700',
    ly:[{i:'⬜',l:'Retrospectiva Olist — Frame',d:0},{i:'🖼',l:'Cover',d:1},{i:'⬜',l:'Info Card',d:1},{i:'T',l:'2025',d:2},{i:'T',l:{pt:'Visão Geral',en:'Overview'},d:2},{i:'T',l:{pt:'Abordagem',en:'Approach'},d:2},{i:'⬛',l:{pt:'Créditos',en:'Credits'},d:2},{i:'⬛',l:'Tags',d:2}]},
-  {id:3,type:'meta',b:'ai',bt:{pt:'IA',en:'AI'},emoji:'🤖',cat:{pt:'IA',en:'AI'},name:{pt:'Este portfolio',en:'This portfolio'},year:'2026',
+  {id:3,type:'meta',b:'ai',bt:{pt:'IA',en:'AI'},emoji:'⭐',cat:{pt:'IA',en:'AI'},name:{pt:'Este portfolio',en:'This portfolio'},year:'2026',
    ac:'#E8921A',fill:'#0A0A0A',
    ly:[{i:'⬜',l:{pt:'Este portfolio : Frame',en:'This portfolio : Frame'},d:0},{i:'🤖',l:{pt:'Construído com IA',en:'Built with AI'},d:1},{i:'T',l:'40min · 1 conversa',d:2},{i:'</>',l:'HTML · CSS · JS',d:2}]},
   {id:4,type:'proj',imgKey:'havro',b:'br',bt:{pt:'Brand',en:'Brand'},emoji:'🎨',cat:{pt:'Branding',en:'Branding'},name:{pt:'Havro',en:'Havro'},year:'2025',
@@ -677,10 +677,10 @@ function buildViews(){
     const flabel=`<div class="fl"><div class="fl-dot" style="background:${p.ac};"></div>${pn(p)}${p.year?` : ${p.year}`:''}</div>`;
 
     if(p.type==='welcome'){
-      const mini=projs.map(pj=>`<div class="pm" onclick="sw(${pj.id})"><img class="pmt" src="${iSrc(pj.imgKey)}" onerror="this.src='${iCdn(pj.imgKey)}'" loading="lazy" alt="${pn(pj)}"><div><div class="pmn">${pn(pj)}</div><div class="pmy">${pj.year||'2025'}</div></div></div>`).join('');
+      const mini=projs.map(pj=>`<div class="pm" onclick="sw(${pj.id})"><img class="pmt" src="${iSrc(pj.imgKey)}" onerror="this.onerror=null;this.src='';this.style.background='${pj.ac}'" loading="lazy" alt="${pn(pj)}"><div><div class="pmn">${pn(pj)}</div><div class="pmy">${pj.year||'2025'}</div></div></div>`).join('');
       w.innerHTML=`<div style="position:relative;">
         ${flabel}
-        <div class="ww">
+        <div class="ww" style="position:relative;">
           <div class="wmc">
             <div class="wprof">
             <div class="wavi"><img src="https://res.cloudinary.com/dhpdh1etq/image/upload/v1778729538/profile-picture_xc1v3l.jpg" alt="Neitam"></div>
@@ -706,9 +706,9 @@ function buildViews(){
               <div class="pgct">${u.projects} · ${projs.length} cases</div>
               ${mini}
             </div>
-            <div class="sk"><div class="skt">${u.sticky}</div><div class="sks">${u.stickySig}</div></div>
           </div>
-        </div>
+        <div class="sk" data-draggable="true" style="left:418px;top:448px;"><div class="skt">${u.sticky}</div><div class="sks">${u.stickySig}</div></div>
+      </div>
         <svg style="position:absolute;top:8px;left:-120px;pointer-events:none;overflow:visible;">
           <text x="0" y="0" font-family="Onest,sans-serif" font-size="10" font-weight="500" fill="#E8921A" opacity=".5">${lang==='pt'?'← projetos aqui':'← projects here'}</text>
           <line x1="-5" y1="4" x2="-38" y2="4" stroke="#E8921A" stroke-width="1" stroke-dasharray="3,2" opacity=".25"/>
