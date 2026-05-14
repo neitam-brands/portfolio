@@ -6,7 +6,7 @@
 <title>Neitam Albrecht : Portfolio</title>
 <meta name="description" content="Designer brasileiro. Brand · Motion · IA.">
 <meta property="og:title" content="Neitam Albrecht : Portfolio">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>N</text></svg>">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -677,7 +677,7 @@ function buildViews(){
     const flabel=`<div class="fl"><div class="fl-dot" style="background:${p.ac};"></div>${pn(p)}${p.year?` : ${p.year}`:''}</div>`;
 
     if(p.type==='welcome'){
-      const mini=projs.map(pj=>`<div class="pm" onclick="sw(${pj.id})"><img class="pmt" src="${iSrc(pj.imgKey)}" onerror="this.onerror=null;this.src='';this.style.background='${pj.ac}'" loading="lazy" alt="${pn(pj)}"><div><div class="pmn">${pn(pj)}</div><div class="pmy">${pj.year||'2025'}</div></div></div>`).join('');
+      const mini=projs.map(pj=>`<div class="pm" onclick="sw(${pj.id})"><img class="pmt" src="${iSrc(pj.imgKey)}" onerror="var c='${iCdn(pj.imgKey)}';c&&this.src!==c?this.src=c:(this.onerror=null,this.src='',this.style.background='${pj.ac}')" loading="lazy" alt="${pn(pj)}"><div><div class="pmn">${pn(pj)}</div><div class="pmy">${pj.year||'2025'}</div></div></div>`).join('');
       w.innerHTML=`<div style="position:relative;">
         ${flabel}
         <div class="ww" style="position:relative;">
