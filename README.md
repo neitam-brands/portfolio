@@ -1,4 +1,4 @@
-# portfolio-neitam-2026
+# Portfolio | Figma Vibe
 
 Esse é o repositório do meu portfolio pessoal. Ele é um arquivo HTML que simula a interface do Figma — porque eu passo o dia no Figma mesmo, então por que meu portfolio seria diferente?
 
